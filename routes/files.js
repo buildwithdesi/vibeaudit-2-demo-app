@@ -5,7 +5,11 @@ import { Router } from 'express';
 export const filesRouter = Router();
 const UPLOADS = path.join(process.cwd(), 'uploads');
 
-// "../../etc/passwd" walks right out of the uploads folder.
 filesRouter.get('/download', (req, res) => {
-  res.sendFile(path.join(UPLOADS, req.query.file));
+  const requested = String(req.query.file ?? '');
+  const resolved = path.resolve(UPLOADS, requested);
+  if (resolved !== UPLOADS && !resolved.startsWith(UPLOADS + path.sep)) {
+    return res.status(403).send('Forbidden');
+  }
+  res.sendFile(resolved);
 });
